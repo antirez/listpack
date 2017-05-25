@@ -1,0 +1,4 @@
+listpack-test
+*.o
+*.dSYM
+*.swp
