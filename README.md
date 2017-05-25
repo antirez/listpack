@@ -25,3 +25,5 @@ API TODO
     unsigned char *lpSeek(unsigned char *lp, long index);
     int lpIsValid(unsigned char *lp, uint32_t len);
     int lpSelfTest(void);
+    int lpSplit(unsigned char *lp, unsigned char *p, unsigned char **left, unsigned char **right);
+    unsigned char *lpMerge(unsigned char *left, unsigned char *right);
