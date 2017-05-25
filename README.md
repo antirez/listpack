@@ -8,15 +8,15 @@ efficiently accessed from left to right and from right to left.
 
 You can find the specification in the `listpack.md` file in this repository.
 
-The `listpack.c` file implemented the full specification, however since
+The `listpack.c` file implements the full specification, however since
 Redis Conf 2017 is near, I'll pause the work for some time to focus on
 talks & training day material. The implementation lacks a complete fuzz testing
 suite like the one of [rax](https://github.com/antirez/rax), the functions
-to validate a listpack load from an untrusted source, and good API
-documentation (even if `listpack.c` top functions comment is already a good
+to validate a listpack loaded from an untrusted source, and good API
+documentation (but `listpack.c` top comments in functions are a good
 starting point).
 
-The code is almost completely untested, so will likely explode while you
+The code is almost completely untested, so it will likely explode while you
 are reading this README file.
 
 API TODO
