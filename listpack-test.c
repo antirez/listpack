@@ -57,5 +57,18 @@ int main(void) {
     dumpListpack(lp);
     showListpack(lp,0);
 
+    /* Seek */
+    for (int i = -10; i < 10; i++) {
+        unsigned char buf[LP_INTBUF_SIZE];
+        int64_t v;
+        unsigned char *p = lpSeek(lp,i);
+        if (p) {
+            unsigned char *ele = lpGet(p,&v,buf);
+            printf("Seek %d: %.*s\n", i, (int)v, ele);
+        } else {
+            printf("Seek %d: NULL\n", i);
+        }
+    }
+
     return 0;
 }
