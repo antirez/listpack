@@ -570,7 +570,8 @@ unsigned char *lpGet(unsigned char *p, int64_t *count, unsigned char *intbuf) {
 
 /* Insert, delete or replace the specified element 'ele' of lenght 'len' at
  * the specified position 'p', with 'p' being a listpack element pointer
- * obtained with lpFirst(), lpLast(), lpIndex(), lpNext() or lpPrev().
+ * obtained with lpFirst(), lpLast(), lpIndex(), lpNext(), lpPrev() or
+ * lpSeek().
  *
  * The element is inserted before, after, or replaces the element pointed
  * by 'p' depending on the 'where' argument, that can be LP_BEFORE, LP_AFTER

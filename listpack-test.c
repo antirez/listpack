@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "listpack.h"
 
 void showListpack(unsigned char *lp, int backward) {
@@ -19,6 +21,79 @@ void dumpListpack(unsigned char *lp) {
         printf("%02x ", lp[j]);
     }
     printf("\n\n");
+}
+
+#define LP_SELF_TEST_MAX_ELE 1024
+unsigned long lpSelfTestRandomElement(unsigned char *ele) {
+    if (rand() % 2) {
+        long long max = 10, n;
+        while(rand() % 2) max *= 2;
+        n = rand() % max;
+        if (rand() % 2) n = -n;
+        return snprintf((char*)ele,LP_SELF_TEST_MAX_ELE,"%lld",n);
+    } else {
+        unsigned long l = rand() % (LP_SELF_TEST_MAX_ELE+1);
+        for (unsigned long i = 0; i < l; i++)
+            ele[i] = 'A'+rand()%26;
+        return l;
+    }
+}
+
+/* Perform an iteration of the self test. The self test is performed by
+ * appending, inserting and deleting a given number of items at random
+ * both in a linear array and in the listpack. At the end the two structures
+ * should contain the same exact sequence.
+ *
+ * The function returns 0 if the test fails (array and listpack content
+ * are not the same), otherwise 1 is returned. */
+int lpSelfTestIteration(unsigned long maxlen) {
+    unsigned char **array = malloc(sizeof(unsigned char*)*maxlen);
+    unsigned char *lp = lpNew();
+    unsigned long curlen = 0;
+    unsigned char ele[LP_SELF_TEST_MAX_ELE];
+    int elelen;
+
+    for (unsigned long i = 0; i < maxlen; i++) {
+        elelen = lpSelfTestRandomElement(ele);
+        if (curlen == 0 || rand() % 2) {
+            /* Append. */
+            array[curlen] = malloc(elelen);
+            memcpy(array[curlen],ele,elelen);
+            lp = lpAppend(lp,ele,elelen);
+        } else {
+            /* Insert. */
+            unsigned long pos = rand() % curlen;
+            unsigned char *p = lpSeek(lp,pos);
+            lp = lpInsert(lp,ele,elelen,p,LP_BEFORE,&p);
+            memmove(array+pos+1,array+pos,sizeof(unsigned char*)*(curlen-pos));
+            array[pos] = malloc(elelen);
+            memcpy(array[pos],ele,elelen);
+        }
+        curlen++;
+
+        if (rand() % 20) {
+            /* Seek & delete random item. */
+        }
+    }
+
+    /* Check for consistency. */
+
+    /* Release allocations. */
+    for (unsigned int i = 0; i < curlen; i++) {
+        free(array[i]);
+    }
+    free(array);
+    lpFree(lp);
+    return 0;
+}
+
+/* Perform a self test of the specified number of iterations. */
+int lpSelfTest(long long iterations) {
+    for(long long i = 0; i < iterations; i++) {
+        if (lpSelfTestIteration(65536*2) == 0)
+            return 0; /* Test failed. */
+    }
+    return 1; /* Test passeed. */
 }
 
 int main(void) {
@@ -69,6 +144,8 @@ int main(void) {
             printf("Seek %d: NULL\n", i);
         }
     }
+
+    lpSelfTest(10000);
 
     return 0;
 }
