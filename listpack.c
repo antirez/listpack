@@ -89,7 +89,7 @@
 #define LP_EOF 0xFF
 
 #define LP_ENCODING_6BIT_STR_LEN(p) ((p)[0] & 0x3F)
-#define LP_ENCODING_12BIT_STR_LEN(p) ((((p)[0] & 0xF) << 4) | (p)[1])
+#define LP_ENCODING_12BIT_STR_LEN(p) ((((p)[0] & 0xF) << 8) | (p)[1])
 #define LP_ENCODING_32BIT_STR_LEN(p) (((uint32_t)(p)[1]<<0) | \
                                       ((uint32_t)(p)[2]<<8) | \
                                       ((uint32_t)(p)[3]<<16) | \
