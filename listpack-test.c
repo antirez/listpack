@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "listpack.h"
 
 void showListpack(unsigned char *lp, int backward) {
@@ -26,8 +27,9 @@ void dumpListpack(unsigned char *lp) {
 #define LP_SELF_TEST_MAX_ELE 1024
 unsigned long lpSelfTestRandomElement(unsigned char *ele) {
     if (rand() % 2) {
-        long long max = 10, n;
-        while(rand() % 2) max *= 2;
+        long long max = 16, n;
+        while((rand() % 6) != 0) max *= 2;
+        if (max <= 0) max = LLONG_MAX;
         n = rand() % max;
         if (rand() % 2) n = -n;
         return snprintf((char*)ele,LP_SELF_TEST_MAX_ELE,"%lld",n);
@@ -54,11 +56,17 @@ int lpSelfTestIteration(unsigned long maxlen) {
     int elelen;
 
     for (unsigned long i = 0; i < maxlen; i++) {
+#if 0
+        showListpack(lp,0);
+        showListpack(lp,1);
+        printf("--\n");
+#endif
         elelen = lpSelfTestRandomElement(ele);
         if (curlen == 0 || rand() % 2) {
             /* Append. */
-            array[curlen] = malloc(elelen);
+            array[curlen] = malloc(elelen+1);
             memcpy(array[curlen],ele,elelen);
+            array[curlen][elelen] = '\0';
             lp = lpAppend(lp,ele,elelen);
         } else {
             /* Insert. */
@@ -66,8 +74,9 @@ int lpSelfTestIteration(unsigned long maxlen) {
             unsigned char *p = lpSeek(lp,pos);
             lp = lpInsert(lp,ele,elelen,p,LP_BEFORE,&p);
             memmove(array+pos+1,array+pos,sizeof(unsigned char*)*(curlen-pos));
-            array[pos] = malloc(elelen);
+            array[pos] = malloc(elelen+1);
             memcpy(array[pos],ele,elelen);
+            array[pos][elelen] = '\0';
         }
         curlen++;
 
@@ -77,6 +86,17 @@ int lpSelfTestIteration(unsigned long maxlen) {
     }
 
     /* Check for consistency. */
+    unsigned char *p = lpFirst(lp);
+    for (unsigned long i = 0; i < curlen; i++) {
+        unsigned char buf[LP_INTBUF_SIZE];
+        int64_t v;
+        unsigned char *ele = lpGet(p,&v,buf);
+        if (memcmp(ele,array[i],v) != 0) {
+            printf("Element mismatch: %.*s %s\n",(int)v,ele,array[i]);
+            exit(1);
+        }
+        p = lpNext(lp,p);
+    }
 
     /* Release allocations. */
     for (unsigned int i = 0; i < curlen; i++) {
@@ -84,13 +104,16 @@ int lpSelfTestIteration(unsigned long maxlen) {
     }
     free(array);
     lpFree(lp);
-    return 0;
+    return 1;
 }
 
 /* Perform a self test of the specified number of iterations. */
 int lpSelfTest(long long iterations) {
     for(long long i = 0; i < iterations; i++) {
-        if (lpSelfTestIteration(65536*2) == 0)
+        if ((i % 100) == 0) {
+            printf("."); fflush(stdout);
+        }
+        if (lpSelfTestIteration(100) == 0)
             return 0; /* Test failed. */
     }
     return 1; /* Test passeed. */
@@ -145,7 +168,14 @@ int main(void) {
         }
     }
 
-    lpSelfTest(10000);
+    /* Append long element. */
+    unsigned char buf[407];
+    memset(buf,'A',407);
+    lp = lpAppend(lp,buf,407);
+    dumpListpack(lp);
+    showListpack(lp,0);
+
+    lpSelfTest(100000);
 
     return 0;
 }
