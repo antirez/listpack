@@ -174,6 +174,7 @@ int main(void) {
     lp = lpAppend(lp,buf,407);
     dumpListpack(lp);
     showListpack(lp,0);
+    lpFree(lp);
 
     lpSelfTest(100000);
 
