@@ -24,7 +24,7 @@ void dumpListpack(unsigned char *lp) {
     printf("\n\n");
 }
 
-#define LP_SELF_TEST_MAX_ELE 1024
+#define LP_SELF_TEST_MAX_ELE (1024*5) /* Make sure to stress 32 bit strings. */
 unsigned long lpSelfTestRandomElement(unsigned char *ele) {
     if (rand() % 2) {
         long long max = 16, n;
@@ -81,7 +81,7 @@ int lpSelfTestIteration(unsigned long maxlen) {
         curlen++;
 
         if (rand() % 20) {
-            /* Seek & delete random item. */
+            /* TODO: Seek & delete random item. */
         }
     }
 
@@ -92,7 +92,10 @@ int lpSelfTestIteration(unsigned long maxlen) {
         int64_t v;
         unsigned char *ele = lpGet(p,&v,buf);
         if (memcmp(ele,array[i],v) != 0) {
-            printf("Element mismatch: %.*s %s\n",(int)v,ele,array[i]);
+            printf("Element %lu mismatch:\n"
+                   "LISTPACK = [%d]%.*s\n"
+                   "C-STRING = [%d]%s\n",
+                   i,(int)v,(int)v,ele,(int)strlen((char*)array[i]),array[i]);
             exit(1);
         }
         p = lpNext(lp,p);
