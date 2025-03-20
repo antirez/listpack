@@ -26,10 +26,16 @@ void dumpListpack(unsigned char *lp) {
 
 #define LP_SELF_TEST_MAX_ELE (1024*5) /* Make sure to stress 32 bit strings. */
 unsigned long lpSelfTestRandomElement(unsigned char *ele) {
+    long long half_max = LLONG_MAX / 2;
     if (rand() % 2) {
         long long max = 16, n;
-        while((rand() % 6) != 0) max *= 2;
-        if (max <= 0) max = LLONG_MAX;
+        while((rand() % 6) != 0) {
+            if (max > half_max) {
+                max = LLONG_MAX;
+                break;
+            }
+            max *= 2;
+        }
         n = rand() % max;
         if (rand() % 2) n = -n;
         return snprintf((char*)ele,LP_SELF_TEST_MAX_ELE,"%lld",n);
