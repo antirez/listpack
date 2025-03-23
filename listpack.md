@@ -183,8 +183,8 @@ and may be missing in the special case of the empty string.
 
 A few examples:
 
-    "\x40" -- The empty string
-    "\x45hello" -- The string "hello"
+    "\x80" -- The empty string
+    "\x85hello" -- The string "hello"
 
 Multi byte encodings
 ---
